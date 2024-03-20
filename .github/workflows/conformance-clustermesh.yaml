@@ -483,7 +483,7 @@ jobs:
           --junit-property github_job_step="Run connectivity test (${{ join(matrix.*, ', ') }})"
 
       - name: Post-test information gathering
-        if: ${{ !success() && steps.install-cilium-cluster1.outcome != 'skipped' }}
+        if: ${{ always() && steps.install-cilium-cluster1.outcome != 'skipped' }}
         run: |
           cilium --context ${{ env.contextName1 }} status
           cilium --context ${{ env.contextName1 }} clustermesh status
@@ -511,7 +511,7 @@ jobs:
         shell: bash {0} # Disable default fail-fast behaviour so that all commands run independently
 
       - name: Upload artifacts
-        if: ${{ !success() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: cilium-sysdumps-${{ matrix.name }}
