@@ -14,6 +14,7 @@ import (
 	"github.com/cilium/cilium/pkg/identity"
 	"github.com/cilium/cilium/pkg/identity/cache"
 	"github.com/cilium/cilium/pkg/labels"
+	"github.com/cilium/cilium/pkg/policy/api"
 	"github.com/cilium/cilium/pkg/policy/trafficdirection"
 	"github.com/cilium/cilium/pkg/u8proto"
 )
@@ -24,68 +25,68 @@ func Test_IsSuperSetOf(t *testing.T) {
 		subSet   Key
 		res      int
 	}{
-		{Key{}, Key{}, 0},
-		{Key{0, 0, 0, 0}, Key{42, 0, 6, 0}, 1},
-		{Key{0, 0, 0, 0}, Key{42, 80, 6, 0}, 1},
-		{Key{0, 0, 0, 0}, Key{42, 0, 0, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{42, 0, 6, 0}, 2},
-		{Key{0, 0, 6, 0}, Key{42, 80, 6, 0}, 2},
-		{Key{0, 80, 6, 0}, Key{42, 80, 6, 0}, 3},
-		{Key{0, 80, 6, 0}, Key{42, 80, 17, 0}, 0},  // proto is different
-		{Key{2, 80, 6, 0}, Key{42, 80, 6, 0}, 0},   // id is different
-		{Key{0, 8080, 6, 0}, Key{42, 80, 6, 0}, 0}, // port is different
-		{Key{42, 0, 0, 0}, Key{42, 0, 0, 0}, 0},    // same key
-		{Key{42, 0, 0, 0}, Key{42, 0, 6, 0}, 4},
-		{Key{42, 0, 0, 0}, Key{42, 80, 6, 0}, 4},
-		{Key{42, 0, 0, 0}, Key{42, 0, 17, 0}, 4},
-		{Key{42, 0, 0, 0}, Key{42, 80, 17, 0}, 4},
-		{Key{42, 0, 6, 0}, Key{42, 0, 6, 0}, 0}, // same key
-		{Key{42, 0, 6, 0}, Key{42, 80, 6, 0}, 5},
-		{Key{42, 0, 6, 0}, Key{42, 8080, 6, 0}, 5},
-		{Key{42, 80, 6, 0}, Key{42, 80, 6, 0}, 0},    // same key
-		{Key{42, 80, 6, 0}, Key{42, 8080, 6, 0}, 0},  // different port
-		{Key{42, 80, 6, 0}, Key{42, 80, 17, 0}, 0},   // different proto
-		{Key{42, 80, 6, 0}, Key{42, 8080, 17, 0}, 0}, // different port and proto
+		{Key{PortMask: api.FullPortMask}, Key{PortMask: api.FullPortMask}, 0},
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 2},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 2},
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 3},
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 17, 0}, 0},  // proto is different
+		{Key{2, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 0},   // id is different
+		{Key{0, 8080, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 0}, // port is different
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0},    // same key
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 17, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 80, api.FullPortMask, 17, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 0}, // same key
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 5},
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 8080, api.FullPortMask, 6, 0}, 5},
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 0},    // same key
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 8080, api.FullPortMask, 6, 0}, 0},  // different port
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 17, 0}, 0},   // different proto
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 8080, api.FullPortMask, 17, 0}, 0}, // different port and proto
 
 		// increasing specificity for a L3/L4 key
-		{Key{0, 0, 0, 0}, Key{42, 80, 6, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{42, 80, 6, 0}, 2},
-		{Key{0, 80, 6, 0}, Key{42, 80, 6, 0}, 3},
-		{Key{42, 0, 0, 0}, Key{42, 80, 6, 0}, 4},
-		{Key{42, 0, 6, 0}, Key{42, 80, 6, 0}, 5},
-		{Key{42, 80, 6, 0}, Key{42, 80, 6, 0}, 0}, // same key
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 2},
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 3},
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 5},
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 80, api.FullPortMask, 6, 0}, 0}, // same key
 
 		// increasing specificity for a L3-only key
-		{Key{0, 0, 0, 0}, Key{42, 0, 0, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{42, 0, 0, 0}, 0},   // not a superset
-		{Key{0, 80, 6, 0}, Key{42, 0, 0, 0}, 0},  // not a superset
-		{Key{42, 0, 0, 0}, Key{42, 0, 0, 0}, 0},  // same key
-		{Key{42, 0, 6, 0}, Key{42, 0, 0, 0}, 0},  // not a superset
-		{Key{42, 80, 6, 0}, Key{42, 0, 0, 0}, 0}, // not a superset
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0},   // not a superset
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0},  // not a superset
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0},  // same key
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0},  // not a superset
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 0, 0}, 0}, // not a superset
 
 		// increasing specificity for a L3/proto key
-		{Key{0, 0, 0, 0}, Key{42, 0, 6, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{42, 0, 6, 0}, 2},
-		{Key{0, 80, 6, 0}, Key{42, 0, 6, 0}, 0}, // not a superset
-		{Key{42, 0, 0, 0}, Key{42, 0, 6, 0}, 4},
-		{Key{42, 0, 6, 0}, Key{42, 0, 6, 0}, 0},  // same key
-		{Key{42, 80, 6, 0}, Key{42, 0, 6, 0}, 0}, // not a superset
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 2},
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 0}, // not a superset
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 4},
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 0},  // same key
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{42, 0, api.FullPortMask, 6, 0}, 0}, // not a superset
 
 		// increasing specificity for a proto-only key
-		{Key{0, 0, 0, 0}, Key{0, 0, 6, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{0, 0, 6, 0}, 0},   // same key
-		{Key{0, 80, 6, 0}, Key{0, 0, 6, 0}, 0},  // not a superset
-		{Key{42, 0, 0, 0}, Key{0, 0, 6, 0}, 0},  // not a superset
-		{Key{42, 0, 6, 0}, Key{0, 0, 6, 0}, 0},  // not a superset
-		{Key{42, 80, 6, 0}, Key{0, 0, 6, 0}, 0}, // not a superset
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 0},   // same key
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 0},  // not a superset
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 0},  // not a superset
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 0},  // not a superset
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{0, 0, api.FullPortMask, 6, 0}, 0}, // not a superset
 
 		// increasing specificity for a L4-only key
-		{Key{0, 0, 0, 0}, Key{0, 80, 6, 0}, 1},
-		{Key{0, 0, 6, 0}, Key{0, 80, 6, 0}, 2},
-		{Key{0, 80, 6, 0}, Key{0, 80, 6, 0}, 0},  // same key
-		{Key{42, 0, 0, 0}, Key{0, 80, 6, 0}, 0},  // not a superset
-		{Key{42, 0, 6, 0}, Key{0, 80, 6, 0}, 0},  // not a superset
-		{Key{42, 80, 6, 0}, Key{0, 80, 6, 0}, 0}, // not a superset
+		{Key{0, 0, api.FullPortMask, 0, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 1},
+		{Key{0, 0, api.FullPortMask, 6, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 2},
+		{Key{0, 80, api.FullPortMask, 6, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 0},  // same key
+		{Key{42, 0, api.FullPortMask, 0, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 0},  // not a superset
+		{Key{42, 0, api.FullPortMask, 6, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 0},  // not a superset
+		{Key{42, 80, api.FullPortMask, 6, 0}, Key{0, 80, api.FullPortMask, 6, 0}, 0}, // not a superset
 
 	}
 	for i, tt := range tests {
@@ -1192,6 +1193,7 @@ func testKey(id int, port uint16, proto uint8, direction trafficdirection.Traffi
 		Identity:         uint32(id),
 		DestPort:         port,
 		Nexthdr:          proto,
+		PortMask:         api.FullPortMask,
 		TrafficDirection: direction.Uint8(),
 	}
 }
@@ -1591,13 +1593,13 @@ func (ds *PolicyTestSuite) TestMapState_AccumulateMapChangesDeny(c *check.C) {
 			if x.cs != nil {
 				cs = x.cs
 			}
-			key := Key{DestPort: x.port, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
+			key := Key{DestPort: x.port, PortMask: api.FullPortMask, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
 			var proxyPort uint16
 			if x.redirect {
 				proxyPort = 1
 			}
 			value := NewMapStateEntry(cs, nil, proxyPort, "", 0, x.deny, DefaultAuthType, AuthTypeDisabled)
-			policyMaps.AccumulateMapChanges(cs, adds, deletes, key, value)
+			policyMaps.AccumulateMapChanges(cs, adds, deletes, []Key{key}, value)
 		}
 		adds, deletes := policyMaps.consumeMapChanges(DummyOwner{}, policyMapState, denyRules, nil)
 		policyMapState.validatePortProto(c)
@@ -1812,13 +1814,13 @@ func (ds *PolicyTestSuite) TestMapState_AccumulateMapChanges(c *check.C) {
 			if x.cs != nil {
 				cs = x.cs
 			}
-			key := Key{DestPort: x.port, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
+			key := Key{DestPort: x.port, PortMask: api.FullPortMask, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
 			var proxyPort uint16
 			if x.redirect {
 				proxyPort = 1
 			}
 			value := NewMapStateEntry(cs, nil, proxyPort, "", 0, x.deny, x.hasAuth, x.authType)
-			policyMaps.AccumulateMapChanges(cs, adds, deletes, key, value)
+			policyMaps.AccumulateMapChanges(cs, adds, deletes, []Key{key}, value)
 		}
 		adds, deletes := policyMaps.consumeMapChanges(DummyOwner{}, policyMapState, policyFeatures(0), nil)
 		policyMapState.validatePortProto(c)
@@ -2379,13 +2381,13 @@ func (ds *PolicyTestSuite) TestMapState_AccumulateMapChangesOnVisibilityKeys(c *
 			if x.cs != nil {
 				cs = x.cs
 			}
-			key := Key{DestPort: x.port, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
+			key := Key{DestPort: x.port, PortMask: api.FullPortMask, Nexthdr: x.proto, TrafficDirection: dir.Uint8()}
 			var proxyPort uint16
 			if x.redirect {
 				proxyPort = 1
 			}
 			value := NewMapStateEntry(cs, nil, proxyPort, "", 0, x.deny, DefaultAuthType, AuthTypeDisabled)
-			policyMaps.AccumulateMapChanges(cs, adds, deletes, key, value)
+			policyMaps.AccumulateMapChanges(cs, adds, deletes, []Key{key}, value)
 		}
 		adds, deletes := policyMaps.consumeMapChanges(DummyOwner{}, policyMapState, denyRules, nil)
 		changes = ChangeState{

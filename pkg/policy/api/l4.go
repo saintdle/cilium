@@ -21,6 +21,9 @@ const (
 	ProtoAny    L4Proto = "ANY"
 
 	PortProtocolAny = "0/ANY"
+
+	// FullPortMask is the mask to select only one port.
+	FullPortMask uint16 = 0xffff
 )
 
 // IsAny returns true if an L4Proto represents ANY protocol
